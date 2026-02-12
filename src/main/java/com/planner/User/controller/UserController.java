@@ -1,9 +1,6 @@
 package com.planner.User.controller;
 
-import com.planner.User.dto.UserGetAllResponse;
-import com.planner.User.dto.UserGetResponse;
-import com.planner.User.dto.UserSaveRequest;
-import com.planner.User.dto.UserSaveResponse;
+import com.planner.User.dto.*;
 import com.planner.User.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,5 +34,14 @@ public class UserController {
             @PathVariable Long userId // URL 경로에 있는 {userId}를 받아옵니다.
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.findOne(userId));
+    }
+
+    // 유저 수정
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<UserUpdateResponse> update(
+            @PathVariable Long userId,
+            @RequestBody UserUpdateRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
     }
 }

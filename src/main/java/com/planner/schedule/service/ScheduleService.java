@@ -1,14 +1,12 @@
 package com.planner.schedule.service;
 
-import com.planner.schedule.dto.ScheduleGetAllResponse;
-import com.planner.schedule.dto.ScheduleGetResponse;
-import com.planner.schedule.dto.ScheduleSaveRequest;
-import com.planner.schedule.dto.ScheduleSaveResponse;
+import com.planner.schedule.dto.*;
 import com.planner.schedule.entity.Schedule;
 import com.planner.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +76,32 @@ public class ScheduleService {
                 () -> new IllegalStateException("존재하지 않는 일정입니다.")
         );
         return new ScheduleGetResponse(
+                schedule.getId(),
+                schedule.getTitle(),
+                schedule.getContent(),
+                schedule.getAuthor(),
+                schedule.getCreatedAt(),
+                schedule.getModifiedAt()
+        );
+    }
+
+    // 일정 수정
+    @Transactional
+    public ScheduleUpdateResponse update(Long scheduleId, ScheduleUpdateRequest request) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 일정입니다.")
+        );
+
+        // 비밀번호 체크
+        if (!ObjectUtils.nullSafeEquals(schedule.getPassword(), request.getPassword())) {
+            throw new IllegalStateException("비밀번호가 일치하지 않습니다");
+        }
+
+        schedule.updateTitleAndAuthor(
+                request.getTitle(),
+                request.getAuthor()
+        );
+        return new ScheduleUpdateResponse(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),

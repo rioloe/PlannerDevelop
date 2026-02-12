@@ -111,4 +111,21 @@ public class ScheduleService {
         );
     }
 
+    // 일정 삭제
+    @Transactional
+    public void delete(Long scheduleId, String password) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 일정입니다.")
+        );
+
+        // 비밀번호 불일치 할때
+        if (!ObjectUtils.nullSafeEquals(password, schedule.getPassword())) {
+            throw new IllegalStateException("비밀번호가 일치하지 않습니다");
+        }
+
+        // 비밀번호 일치할때
+        scheduleRepository.deleteById(scheduleId);
+
+    }
+
 }

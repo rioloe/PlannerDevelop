@@ -1,6 +1,7 @@
 package com.planner.User.service;
 
 import com.planner.User.dto.UserGetAllResponse;
+import com.planner.User.dto.UserGetResponse;
 import com.planner.User.dto.UserSaveRequest;
 import com.planner.User.dto.UserSaveResponse;
 import com.planner.User.entity.User;
@@ -46,5 +47,20 @@ public class UserService {
                         user.getEmail(),
                         user.getCreatedAt()
                 )).toList();
+    }
+
+    // 유저 단건 조회
+    @Transactional(readOnly = true)
+    public UserGetResponse findOne(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 유저")
+        );
+        return new UserGetResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getModifiedAt()
+        );
     }
 }

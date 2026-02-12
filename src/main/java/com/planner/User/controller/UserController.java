@@ -44,4 +44,16 @@ public class UserController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
     }
+
+    // 유저 삭제
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long userId // 삭제할 유저의 ID를 주소창에서 받아옵니다.
+    ) {
+        // 서비스에게 삭제를 시킵니다.
+        userService.delete(userId);
+
+        // 삭제가 성공하면 "내용 없음"을 뜻하는 204 No Content 상태 코드를 보내는 게 관례입니다.
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

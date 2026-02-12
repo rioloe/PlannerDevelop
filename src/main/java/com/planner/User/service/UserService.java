@@ -77,4 +77,13 @@ public class UserService {
                 user.getModifiedAt()
         );
     }
+
+    // 유저 삭제
+    @Transactional
+    public void delete(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 유저")
+        );
+        userRepository.delete(user);
+    }
 }

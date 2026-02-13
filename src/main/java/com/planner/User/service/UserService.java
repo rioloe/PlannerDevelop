@@ -3,6 +3,7 @@ package com.planner.User.service;
 import com.planner.User.dto.*;
 import com.planner.User.entity.User;
 import com.planner.User.repository.UserRepository;
+import com.planner.config.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 유저 생성
     @Transactional
@@ -22,6 +24,9 @@ public class UserService {
         if (request.getPassword() == null || request.getPassword().length() < 8) {
             throw new IllegalArgumentException("비밀번호 8자 이상이어야 함");
         }
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
         User user = new User(
                 request.getUsername(),
                 request.getEmail(),
@@ -93,11 +98,11 @@ public class UserService {
 
     // 로그인
     @Transactional(readOnly = true)
-    public User login(String email, String password){
+    public User login(String email, String rawPassword){
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new IllegalArgumentException("이메일 일치하지 않음")
         );
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new IllegalArgumentException("비밀번호 일치하지 않음");
         }
         return user;

@@ -2,6 +2,7 @@ package com.planner.schedule.controller;
 
 import com.planner.schedule.dto.*;
 import com.planner.schedule.service.ScheduleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class ScheduleController {
     // 일정 생성
     @PostMapping("/schedules")
     public ResponseEntity<ScheduleSaveResponse> create(
-            @RequestBody ScheduleSaveRequest request
+            @Valid @RequestBody ScheduleSaveRequest request
     ) {
         return  ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.save(request));
     }
@@ -42,7 +43,7 @@ public class ScheduleController {
     @PutMapping("/schedules/{scheduleId}")
     public ResponseEntity<ScheduleUpdateResponse> update(
             @PathVariable Long scheduleId,
-            @RequestBody ScheduleUpdateRequest request
+            @Valid @RequestBody ScheduleUpdateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(scheduleService.update(scheduleId, request));
     }

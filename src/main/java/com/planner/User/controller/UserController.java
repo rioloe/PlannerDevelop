@@ -5,6 +5,7 @@ import com.planner.User.entity.User;
 import com.planner.User.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class UserController {
     // 유저 생성
     @PostMapping("/users")
     public ResponseEntity<UserSaveResponse> create(
-            @RequestBody UserSaveRequest request
+            @Valid @RequestBody UserSaveRequest request
     ){
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));
     }
@@ -43,7 +44,7 @@ public class UserController {
     @PutMapping("/users/{userId}")
     public ResponseEntity<UserUpdateResponse> update(
             @PathVariable Long userId,
-            @RequestBody UserUpdateRequest request
+            @Valid @RequestBody UserUpdateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.update(userId, request));
     }
@@ -62,7 +63,8 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public String login(
+            @Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
 
         // 1. 유저 검증
         User user = userService.login(loginRequest.getEmail(), loginRequest.getPassword());

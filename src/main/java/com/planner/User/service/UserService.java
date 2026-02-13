@@ -18,6 +18,10 @@ public class UserService {
     // 유저 생성
     @Transactional
     public UserSaveResponse save(UserSaveRequest request){
+        // 비밀번호 8자 이상 검증 로직
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
+            throw new IllegalArgumentException("비밀번호 8자 이상이어야 함");
+        }
         User user = new User(
                 request.getUsername(),
                 request.getEmail(),

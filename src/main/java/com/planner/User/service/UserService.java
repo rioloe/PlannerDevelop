@@ -90,4 +90,16 @@ public class UserService {
         );
         userRepository.delete(user);
     }
+
+    // 로그인
+    @Transactional(readOnly = true)
+    public User login(String email, String password){
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new IllegalArgumentException("이메일 일치하지 않음")
+        );
+        if (!user.getPassword().equals(password)) {
+            throw new IllegalArgumentException("비밀번호 일치하지 않음");
+        }
+        return user;
+    }
 }

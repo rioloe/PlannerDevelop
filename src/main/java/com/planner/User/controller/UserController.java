@@ -1,7 +1,10 @@
 package com.planner.User.controller;
 
 import com.planner.User.dto.*;
+import com.planner.User.entity.User;
 import com.planner.User.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +58,30 @@ public class UserController {
 
         // 삭제가 성공하면 "내용 없음"을 뜻하는 204 No Content 상태 코드를 보내는 게 관례입니다.
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    // 로그인
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+
+        // 1. 유저 검증
+        User user = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
+
+        // 2. 세션 생성
+        HttpSession session = request.getSession();
+
+        // 3. 세션에 유저 정보 저장
+        session.setAttribute("USER_ID", user.getId());
+
+        return "로그인 성공";
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false); // 세션이 없으면 null 반환
+        if (session != null) {
+            session.invalidate(); // 세션 무효화
+        }
+        return "로그아웃 성공";
     }
 }

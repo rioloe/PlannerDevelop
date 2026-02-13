@@ -1,5 +1,6 @@
 package com.planner.schedule.entity;
 
+import com.planner.User.entity.User;
 import com.planner.commone.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -16,18 +17,22 @@ public class Schedule extends BaseEntity {
     private Long id;
     private String title;
     private String content;
-    private String author;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     private String password;
 
-    public Schedule(String title, String content, String author, String password) {
+    public Schedule(String title, String content, User user, String password) {
         this.title = title;
         this.content = content;
-        this.author = author;
+        this.user = user;
         this.password = password;
     }
 
-    public void updateTitleAndAuthor(String title, String author) {
+    public void updateTitleAndContent(String title, String content) {
         this.title = title;
-        this.author = author;
+        this.content = content;
     }
 }

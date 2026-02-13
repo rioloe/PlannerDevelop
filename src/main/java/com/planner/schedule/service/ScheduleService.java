@@ -1,5 +1,7 @@
 package com.planner.schedule.service;
 
+import com.planner.User.entity.User;
+import com.planner.User.repository.UserRepository;
 import com.planner.schedule.dto.*;
 import com.planner.schedule.entity.Schedule;
 import com.planner.schedule.repository.ScheduleRepository;
@@ -15,14 +17,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final UserRepository userRepository;
 
     // 일정 생성
     @Transactional
     public ScheduleSaveResponse save(ScheduleSaveRequest request) {
+        User user = userRepository.findById(request.getUserId()).orElseThrow(
+                () -> new IllegalArgumentException("존재 하지 않는 유저 ID" + request.getUserId())
+        );
+
+
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getContent(),
-                request.getAuthor(),
+                user,
                 request.getPassword()
         );
         Schedule savedSchedule = scheduleRepository.save(schedule);
@@ -30,7 +38,7 @@ public class ScheduleService {
                 savedSchedule.getId(),
                 savedSchedule.getTitle(),
                 savedSchedule.getContent(),
-                savedSchedule.getAuthor(),
+                savedSchedule.getUser().getUsername(),
                 savedSchedule.getCreatedAt(),
                 savedSchedule.getModifiedAt()
         );
@@ -38,35 +46,24 @@ public class ScheduleService {
 
     // 전체 일정 조회
     @Transactional(readOnly = true)
-    public List<ScheduleGetAllResponse> findAll(String author) {
+    public List<ScheduleGetAllResponse> findAll(String username) {
+        List<Schedule> schedules;
 
-        // author (작성자) 없는 경우, 스트림으로 작성
-        if (author == null) {
-            List<Schedule> schedules = scheduleRepository.findAllByOrderByModifiedAt();
-            return schedules.stream()
-                    .map(schedule -> new ScheduleGetAllResponse(
-                            schedule.getId(),
-                            schedule.getTitle(),
-                            schedule.getContent(),
-                            schedule.getAuthor(),
-                            schedule.getCreatedAt(),
-                            schedule.getModifiedAt()
-                    )).toList();
+        // 작성자 없는 경우
+        if (username == null || username.isBlank()) {
+            schedules = scheduleRepository.findAllByOrderByModifiedAtDesc();
+        } else {
+            schedules = scheduleRepository.findAllByUserUsernameOrderByModifiedAtDesc(username);
         }
-
-        List<Schedule> schedulesByAuthor = scheduleRepository.findAllByAuthorOrderByModifiedAt(author);
-        List<ScheduleGetAllResponse> dtos = new ArrayList<>();
-        for (Schedule schedule : schedulesByAuthor) {
-            dtos.add(new ScheduleGetAllResponse(
-                    schedule.getId(),
-                    schedule.getTitle(),
-                    schedule.getContent(),
-                    schedule.getAuthor(),
-                    schedule.getCreatedAt(),
-                    schedule.getModifiedAt()
-            ));
-        }
-        return dtos;
+        return schedules.stream()
+                .map(schedule -> new ScheduleGetAllResponse(
+                        schedule.getId(),
+                        schedule.getTitle(),
+                        schedule.getContent(),
+                        schedule.getUser().getUsername(),
+                        schedule.getCreatedAt(),
+                        schedule.getModifiedAt()
+                )).toList();
     }
 
     // 선택 일정 조회
@@ -79,7 +76,7 @@ public class ScheduleService {
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),
-                schedule.getAuthor(),
+                schedule.getUser().getUsername(),
                 schedule.getCreatedAt(),
                 schedule.getModifiedAt()
         );
@@ -97,15 +94,15 @@ public class ScheduleService {
             throw new IllegalStateException("비밀번호가 일치하지 않습니다");
         }
 
-        schedule.updateTitleAndAuthor(
+        schedule.updateTitleAndContent(
                 request.getTitle(),
-                request.getAuthor()
+                request.getContent()
         );
         return new ScheduleUpdateResponse(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),
-                schedule.getAuthor(),
+                schedule.getUser().getUsername(),
                 schedule.getCreatedAt(),
                 schedule.getModifiedAt()
         );
